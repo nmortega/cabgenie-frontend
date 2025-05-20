@@ -20,7 +20,7 @@ export default function Upload() {
     try {
       const response = await axios.post(
         "https://cabgenie-backend.up.railway.app/api/upload_image/",
-        formData
+        formData, {withCredentials: false,}
       );
 
       const { preview_url, volume_url, mask_url } = response.data;
