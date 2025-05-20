@@ -19,16 +19,22 @@ export default function Upload() {
     setIsUploading(true);
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/upload_image/",
+        "https://cabgenie-backend.up.railway.app/api/upload_image/",
         formData
       );
 
-      const imageURL = response.data.preview_url;
-      console.log("Preview URL:", imageURL);
-      setImageSrc(imageURL);
+      const { preview_url, volume_url, mask_url } = response.data;
+      setImageSrc(preview_url);
+
+      // ✅ Generate Kitware Glance URL
+      const glanceBase = "http://localhost:9999";
+      const url = new URL(glanceBase);
+      url.searchParams.append("name", "[CT,Segmentation]");
+      url.searchParams.append("url", `[${volume_url},${mask_url}]`);
+      setGlanceURL(url.toString());
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Failed to upload and generate preview.");
+      alert("❌ Failed to upload and generate preview.");
     } finally {
       setIsUploading(false);
     }
@@ -67,7 +73,7 @@ export default function Upload() {
 
         {imageSrc && (
           <a
-            href="http://localhost:5173/viewer"
+            href="http://localhost:9999/viewer"
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-success"
