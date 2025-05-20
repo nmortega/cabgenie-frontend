@@ -6,6 +6,7 @@ export default function Upload() {
   const [imageSrc, setImageSrc] = useState(null); // Matplotlib preview
   const [isUploading, setIsUploading] = useState(false);
   const viewerRef = useRef(null);
+  const [glanceURL, setGlanceURL] = useState("");
 
   const handleUpload = async () => {
     if (!file) {
