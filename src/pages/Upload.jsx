@@ -20,14 +20,12 @@ export default function Upload() {
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/upload_image/",
-        formData,
-        { responseType: "blob" } // ✅ Important: get binary PNG data
+        formData
       );
 
-      const blob = response.data;
-      const imageURL = URL.createObjectURL(blob); // ✅ Create image URL from blob
-      console.log("Generated Image URL:", imageURL);
-      setImageSrc(imageURL); // ✅ Set for display
+      const imageURL = response.data.preview_url;
+      console.log("Preview URL:", imageURL);
+      setImageSrc(imageURL);
     } catch (error) {
       console.error("Upload error:", error);
       alert("Failed to upload and generate preview.");
@@ -66,9 +64,19 @@ export default function Upload() {
             "Upload and Preview"
           )}
         </button>
+
+        {imageSrc && (
+          <a
+            href="http://localhost:5173/viewer"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-success"
+          >
+            View in Kitware Glance
+          </a>
+        )}
       </div>
 
-      {/* ✅ Display prediction preview */}
       {imageSrc && (
         <div className="mt-4">
           <h5>Matplotlib Prediction Preview</h5>
@@ -84,18 +92,6 @@ export default function Upload() {
           />
         </div>
       )}
-
-      {/* ✅ Kitware Glance Button */}
-      <div className="mt-4">
-        <a
-          href="http://localhost:5173/viewer" // adjust this to your Glance viewer path
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn btn-success"
-        >
-          View in Kitware Glance
-        </a>
-      </div>
     </div>
   );
 }
