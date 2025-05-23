@@ -20,7 +20,7 @@ export default function Upload() {
     setIsUploading(true);
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/upload_image/",
+        "https://cabgenie-backend.up.railway.app/api/upload_image/",
         formData
       );
 
