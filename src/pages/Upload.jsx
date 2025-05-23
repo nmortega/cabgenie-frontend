@@ -1,12 +1,12 @@
 import axios from "axios";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 export default function Upload() {
   const [file, setFile] = useState(null);
-  const [imageSrc, setImageSrc] = useState(null); // Matplotlib preview
+  const [imageSrc, setImageSrc] = useState(null);
+  const [volumeUrl, setVolumeUrl] = useState(null);
+  const [maskUrl, setMaskUrl] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-  const viewerRef = useRef(null);
-  const [glanceURL, setGlanceURL] = useState("");
 
   const handleUpload = async () => {
     if (!file) {
@@ -20,19 +20,15 @@ export default function Upload() {
     setIsUploading(true);
     try {
       const response = await axios.post(
-        "https://cabgenie-backend.up.railway.app/api/upload_image/",
-        formData, {withCredentials: false,}
+        "http://127.0.0.1:8000/api/upload_image/",
+        formData
       );
 
-      const { preview_url, volume_url, mask_url } = response.data;
-      setImageSrc(preview_url);
+      const { volume_url, mask_url, preview_url } = response.data;
 
-      // ✅ Generate Kitware Glance URL
-      const glanceBase = "http://localhost:9999";
-      const url = new URL(glanceBase);
-      url.searchParams.append("name", "[CT,Segmentation]");
-      url.searchParams.append("url", `[${volume_url},${mask_url}]`);
-      setGlanceURL(url.toString());
+      setImageSrc(`${preview_url}?t=${Date.now()}`);
+      setVolumeUrl(volume_url);
+      setMaskUrl(mask_url);
     } catch (error) {
       console.error("Upload error:", error);
       alert("❌ Failed to upload and generate preview.");
@@ -41,64 +37,83 @@ export default function Upload() {
     }
   };
 
+  const handleRender = () => {
+  if (volumeUrl && maskUrl) {
+    const viewerUrl = `http://localhost:3000/?fileToLoad=${encodeURIComponent(
+      volumeUrl
+    )}&labelImage=${encodeURIComponent(maskUrl)}`;
+    window.open(viewerUrl, "_blank");
+  }
+};
+
+
   return (
-    <div className="container mt-5 text-center">
-      <h1>Upload Coronary CT (NIfTI)</h1>
+  <div className="container mt-5 text-center">
+    <h1>Upload Coronary CT (NIfTI)</h1>
 
-      <input
-        type="file"
-        accept=".nii.gz"
-        className="form-control mt-3"
-        onChange={(e) => setFile(e.target.files[0])}
-      />
+    <input
+      type="file"
+      accept=".nii.gz"
+      className="form-control mt-3"
+      onChange={(e) => setFile(e.target.files[0])}
+    />
 
-      <div className="d-flex justify-content-center gap-3 mt-4">
-        <button
-          className="btn btn-primary"
-          onClick={handleUpload}
-          disabled={isUploading || !file}
-        >
-          {isUploading ? (
-            <>
-              <span
-                className="spinner-border spinner-border-sm me-2"
-                role="status"
-                aria-hidden="true"
-              ></span>
-              Upload and Preview...
-            </>
-          ) : (
-            "Upload and Preview"
-          )}
-        </button>
+    {/* 🌐 Optional External Converter Button */}
+    <a
+      href="https://www.onlineconverter.com/dicom-to-nifti"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="btn btn-outline-secondary mt-3"
+    >
+      Don’t have a NIfTI file? Convert DICOM to NIfTI Online →
+    </a>
 
-        {imageSrc && (
-          <a
-            href="http://localhost:9999/viewer"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-success"
-          >
-            View in Kitware Glance
-          </a>
+    {/* 🧩 Upload + Render Buttons Side-by-Side */}
+    <div className="d-flex justify-content-center gap-3 mt-4">
+      <button
+        className="btn btn-primary"
+        onClick={handleUpload}
+        disabled={isUploading || !file}
+      >
+        {isUploading ? (
+          <>
+            <span
+              className="spinner-border spinner-border-sm me-2"
+              role="status"
+              aria-hidden="true"
+            ></span>
+            Uploading...
+          </>
+        ) : (
+          "Upload and Preview"
         )}
-      </div>
+      </button>
 
-      {imageSrc && (
-        <div className="mt-4">
-          <h5>Matplotlib Prediction Preview</h5>
-          <img
-            src={imageSrc}
-            alt="Prediction Preview"
-            className="img-fluid"
-            style={{
-              border: "1px solid #ccc",
-              maxWidth: "100%",
-              height: "auto",
-            }}
-          />
-        </div>
+      {/* ✅ Render only after preview is available */}
+      {imageSrc && volumeUrl && maskUrl && (
+        <button className="btn btn-success" onClick={handleRender}>
+          Render in ITK VTK Viewer
+        </button>
       )}
     </div>
-  );
+
+    {/* ✅ Display prediction preview */}
+    {imageSrc && (
+      <div className="mt-4">
+        <h5>Matplotlib Prediction Preview</h5>
+        <img
+          src={imageSrc}
+          alt="Prediction Preview"
+          className="img-fluid"
+          style={{
+            border: "1px solid #ccc",
+            maxWidth: "100%",
+            height: "auto",
+          }}
+        />
+      </div>
+    )}
+  </div>
+);
+
 }

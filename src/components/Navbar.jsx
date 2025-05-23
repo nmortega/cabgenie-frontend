@@ -1,11 +1,16 @@
+import { Link } from "react-router-dom";
+
 export default function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm px-4">
       <div className="container-fluid">
-        <a className="navbar-brand fw-bold d-flex align-items-center gap-2 text-white" href="#">
-        <i className="bi bi-heart-fill text-danger"></i>
-        CABGenie
-        </a>
+        <Link
+          to="/"
+          className="navbar-brand fw-bold d-flex align-items-center gap-2 text-white text-decoration-none"
+        >
+          <i className="bi bi-heart-fill text-danger"></i>
+          CABGenie
+        </Link>
         <button
           className="navbar-toggler"
           type="button"
@@ -17,15 +22,18 @@ export default function Navbar() {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto align-items-center gap-2">
             <li className="nav-item">
-                <a className="nav-link text-white" href="/">Home</a>
+              <Link className="nav-link text-white" to="/">Home</Link>
             </li>
             <li className="nav-item">
-                <a className="nav-link text-white" href="#">About</a>
+              <Link className="nav-link text-white" to="/about">About</Link>
             </li>
             <li className="nav-item">
-                <a className="btn btn-outline-light d-flex align-items-center gap-2" href="/upload">
+              <Link
+                className="btn btn-outline-light d-flex align-items-center gap-2"
+                to="/upload"
+              >
                 <i className="bi bi-upload"></i> Upload
-                </a>
+              </Link>
             </li>
           </ul>
         </div>
